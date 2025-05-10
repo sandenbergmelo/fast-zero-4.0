@@ -1,0 +1,55 @@
+[project]
+name = "fast-zero"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Sandenberg Ferreira Melo", email = "77549672+sandenbergmelo@users.noreply.github.com" },
+]
+
+requires-python = ">=3.13,<4.0"
+
+dependencies = ["fastapi[standard]>=0.115.12"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.9",
+    "taskipy>=1.14.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = ['.']
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+dev = 'fastapi dev src/fast_zero/app.py'
+run = 'fastapi run src/fast_zero/app.py'
+
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
+format = 'ruff format'
+
+pre_test = 'task lint'
+test = 'pytest -s -x --cov=src -vv'
+post_test = 'coverage html'
+
+clean = 'rm -rf .pytest_cache .ruff_cache .coverage htmlcov'
