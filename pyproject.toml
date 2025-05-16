@@ -7,15 +7,17 @@ authors = [
     { name = "Sandenberg Ferreira Melo", email = "77549672+sandenbergmelo@users.noreply.github.com" },
 ]
 
-requires-python = ">=3.13,<4.0"
+requires-python = ">=3.12,<4.0"
 
-dependencies = ["fastapi[standard]>=0.115.12"]
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
-    "ruff>=0.11.9",
+    "ruff>=0.11.10",
     "taskipy>=1.14.1",
 ]
 
