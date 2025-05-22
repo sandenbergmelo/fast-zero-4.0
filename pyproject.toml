@@ -10,7 +10,10 @@ authors = [
 requires-python = ">=3.12,<4.0"
 
 dependencies = [
+    "alembic>=1.16.1",
     "fastapi[standard]>=0.115.12",
+    "pydantic-settings>=2.9.1",
+    "sqlalchemy>=2.0.41",
 ]
 
 [dependency-groups]
@@ -55,3 +58,8 @@ test = 'pytest -s -x --cov=src -vv'
 post_test = 'coverage html'
 
 clean = 'rm -rf .pytest_cache .ruff_cache .coverage htmlcov'
+
+migrate_upgrade = 'alembic upgrade head'
+migrate_generate = 'alembic revision --autogenerate -m'
+migrate = 'task migrate_generate'
+post_migrate = 'task migrate_upgrade'
