@@ -8,7 +8,11 @@
         "johndoe",
         "onupdate",
         "poolclass",
+        "psycopg",
+        "pwdlib",
         "pydantic",
-        "supersecretpassword"
+        "pyjwt",
+        "supersecretpassword",
+        "tzdata"
     ]
 }
