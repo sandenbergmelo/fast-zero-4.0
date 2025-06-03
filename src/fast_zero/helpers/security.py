@@ -13,7 +13,7 @@ from fast_zero.db.models import User
 from fast_zero.helpers.exceptions import CredentialsException
 from fast_zero.helpers.settings import env
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/token')
 
 pwd_context = PasswordHash.recommended()
 
