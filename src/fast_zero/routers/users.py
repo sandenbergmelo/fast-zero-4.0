@@ -20,12 +20,12 @@ router = APIRouter(prefix='/users', tags=['users'])
 
 
 @router.get('/', status_code=status.HTTP_200_OK, response_model=UsersList)
-def get_all_users(
+async def get_all_users(
     _: T_CurrentUser,
     session: T_Session,
     filter: Annotated[FilterPage, Query()],
 ):
-    users = session.scalars(
+    users = await session.scalars(
         select(User).limit(filter.limit).offset(filter.offset)
     )
     return {'users': users}
@@ -36,12 +36,12 @@ def get_all_users(
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
 )
-def get_user_by_id(
+async def get_user_by_id(
     _: T_CurrentUser,
     user_id: int,
     session: T_Session,
 ):
-    user = session.get(User, user_id)
+    user = await session.get(User, user_id)
 
     if not user:
         raise NotFoundException(detail='User not found')
@@ -54,8 +54,8 @@ def get_user_by_id(
     status_code=status.HTTP_201_CREATED,
     response_model=UserPublic,
 )
-def create_user(user: UserSchema, session: T_Session):
-    db_user = session.scalar(
+async def create_user(user: UserSchema, session: T_Session):
+    db_user = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
         )
@@ -80,8 +80,8 @@ def create_user(user: UserSchema, session: T_Session):
     )
 
     session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
+    await session.commit()
+    await session.refresh(new_user)
 
     return new_user
 
@@ -91,7 +91,7 @@ def create_user(user: UserSchema, session: T_Session):
     status_code=status.HTTP_200_OK,
     response_model=UserPublic,
 )
-def update_user(
+async def update_user(
     user_id: int,
     user: UserSchema,
     session: T_Session,
@@ -105,8 +105,8 @@ def update_user(
         current_user.email = user.email
         current_user.password = get_password_hash(user.password)
 
-        session.commit()
-        session.refresh(current_user)
+        await session.commit()
+        await session.refresh(current_user)
 
         return current_user
 
@@ -122,11 +122,15 @@ def update_user(
     status_code=status.HTTP_200_OK,
     response_model=Message,
 )
-def delete_user(user_id: int, session: T_Session, current_user: T_CurrentUser):
+async def delete_user(
+    user_id: int,
+    session: T_Session,
+    current_user: T_CurrentUser,
+):
     if current_user.id != user_id:
         raise PermissionException()
 
-    session.delete(current_user)
-    session.commit()
+    await session.delete(current_user)
+    await session.commit()
 
     return {'message': 'User deleted'}

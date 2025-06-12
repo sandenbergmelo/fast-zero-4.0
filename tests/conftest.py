@@ -1,10 +1,12 @@
 from contextlib import contextmanager
 from datetime import datetime
+from typing import AsyncGenerator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.pool import StaticPool
 
 from fast_zero.app import app
@@ -14,22 +16,36 @@ from fast_zero.helpers.security import get_password_hash
 
 
 @pytest.fixture
-def session():
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
-    table_registry.metadata.create_all(engine)
-
-    with Session(engine) as session:
-        yield session
-
-    table_registry.metadata.drop_all(engine)
+def anyio_backend():
+    return ('asyncio', {'use_uvloop': True})
 
 
 @pytest.fixture
-def user(session: Session):
+async def session(anyio_backend) -> AsyncGenerator[AsyncSession, None]:
+    async_engine = create_async_engine(
+        'sqlite+aiosqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool,
+    )
+
+    async_session = async_sessionmaker(
+        bind=async_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+    async with async_engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
+
+    async with async_session() as session:
+        yield session
+
+    async with async_engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.drop_all)
+
+
+@pytest.fixture
+async def user(session: AsyncSession):
     clean_password = 'secret'
 
     user = User(
@@ -39,8 +55,8 @@ def user(session: Session):
     )
 
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
 
     user.clean_password = clean_password
 
@@ -48,7 +64,7 @@ def user(session: Session):
 
 
 @pytest.fixture
-def other_user(session: Session):
+async def other_user(session: AsyncSession):
     clean_password = 'secret2'
 
     user = User(
@@ -58,8 +74,8 @@ def other_user(session: Session):
     )
 
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
 
     user.clean_password = clean_password
 

@@ -6,7 +6,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from fast_zero.db.connection import get_session
 from fast_zero.db.models import User
@@ -40,8 +40,8 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-def get_current_user(
-    session: Session = Depends(get_session),
+async def get_current_user(
+    session: AsyncSession = Depends(get_session),
     token: str = Depends(oauth2_scheme),
 ):
     try:
@@ -57,7 +57,7 @@ def get_current_user(
     except jwt.ExpiredSignatureError:
         raise CredentialsException(detail='Token has expired')
 
-    user = session.scalar(select(User).where(User.email == sub_email))
+    user = await session.scalar(select(User).where(User.email == sub_email))
 
     if not user:
         raise CredentialsException()

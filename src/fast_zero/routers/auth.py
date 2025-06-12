@@ -14,13 +14,15 @@ router = APIRouter(prefix='/auth', tags=['auth'])
     status_code=status.HTTP_200_OK,
     response_model=Token,
 )
-def login_from_access_token(session: T_Session, form_data: T_OAuthForm):
+async def login_from_access_token(session: T_Session, form_data: T_OAuthForm):
     incorrect_data_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Incorrect email or password',
     )
 
-    user = session.scalar(select(User).where(User.email == form_data.username))
+    user = await session.scalar(
+        select(User).where(User.email == form_data.username)
+    )
 
     if not user:
         raise incorrect_data_exception

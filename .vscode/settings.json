@@ -5,6 +5,7 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
+        "aiosqlite",
         "freezegun",
         "johndoe",
         "onupdate",
@@ -13,6 +14,7 @@
         "pwdlib",
         "pydantic",
         "pyjwt",
+        "sessionmaker",
         "supersecretpassword",
         "tzdata"
     ]
