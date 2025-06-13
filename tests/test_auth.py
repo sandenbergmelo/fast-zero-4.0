@@ -75,7 +75,7 @@ def test_token_with_no_sub(client: TestClient, user):
 
 
 def test_token_expired_after_time(client: TestClient, user):
-    with freeze_time('2025-05-28 12:00:00'):
+    with freeze_time('2025-11-29 12:00:00'):
         response = client.post(
             '/auth/token',
             data={'username': user.email, 'password': user.clean_password},
@@ -84,7 +84,7 @@ def test_token_expired_after_time(client: TestClient, user):
         assert response.status_code == status.HTTP_200_OK
         token = response.json()['access_token']
 
-    with freeze_time('2025-05-28 12:31:00'):
+    with freeze_time('2025-11-29 12:30:01'):
         response = client.put(
             f'/users/{user.id}',
             headers={'Authorization': f'Bearer {token}'},
@@ -93,6 +93,40 @@ def test_token_expired_after_time(client: TestClient, user):
                 'email': 'test@test.test',
                 'password': 'test',
             },
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {'detail': 'Token has expired'}
+
+
+def test_refresh_token(client: TestClient, user, token):
+    response = client.post(
+        '/auth/refresh_token',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert 'access_token' in data
+    assert 'token_type' in data
+    assert data['token_type'] == 'Bearer'
+
+
+def test_token_expired_should_not_refresh(client: TestClient, user):
+    with freeze_time('2025-11-29 12:00:00'):
+        response = client.post(
+            '/auth/token',
+            data={'username': user.email, 'password': user.clean_password},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        token = response.json()['access_token']
+
+    with freeze_time('2025-11-29 12:30:01'):
+        response = client.post(
+            '/auth/refresh_token',
+            headers={'Authorization': f'Bearer {token}'},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

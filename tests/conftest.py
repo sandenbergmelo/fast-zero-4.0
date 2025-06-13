@@ -11,8 +11,9 @@ from sqlalchemy.pool import StaticPool
 
 from fast_zero.app import app
 from fast_zero.db.connection import get_session
-from fast_zero.db.models import User, table_registry
+from fast_zero.db.models import table_registry
 from fast_zero.helpers.security import get_password_hash
+from tests.factories import UserFactory
 
 
 @pytest.fixture
@@ -48,11 +49,7 @@ async def session(anyio_backend) -> AsyncGenerator[AsyncSession, None]:
 async def user(session: AsyncSession):
     clean_password = 'secret'
 
-    user = User(
-        username='JohnDoe',
-        email='johndoe@email.com',
-        password=get_password_hash(clean_password),
-    )
+    user = UserFactory(password=get_password_hash(clean_password))
 
     session.add(user)
     await session.commit()
@@ -67,11 +64,7 @@ async def user(session: AsyncSession):
 async def other_user(session: AsyncSession):
     clean_password = 'secret2'
 
-    user = User(
-        username='JohnDoe2',
-        email='johndoe2@email.com',
-        password=get_password_hash(clean_password),
-    )
+    user = UserFactory(password=get_password_hash(clean_password))
 
     session.add(user)
     await session.commit()

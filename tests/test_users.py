@@ -65,6 +65,7 @@ def test_get_all_users(client: TestClient, user, other_user, token):
 
 def test_get_user_by_id(client: TestClient, user, token):
     user_schema = UserPublic.model_validate(user).model_dump()
+
     response = client.get(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
@@ -118,21 +119,17 @@ def test_update_wrong_user(client: TestClient, other_user, token):
     assert response.json() == {'detail': 'Not enough permissions'}
 
 
-def test_update_user_integrity_error(client: TestClient, user, token):
-    client.post(
-        '/users',
-        json={
-            'username': 'other',
-            'email': 'other@example.com',
-            'password': 'secret',
-        },
-    )
-
+def test_update_user_integrity_error(
+    client: TestClient,
+    user,
+    other_user,
+    token,
+):
     response = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'other',
+            'username': other_user.username,
             'email': 'bob@example.com',
             'password': 'secret',
         },
