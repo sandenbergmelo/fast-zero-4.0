@@ -20,7 +20,7 @@ router = APIRouter(prefix='/users', tags=['users'])
 
 
 @router.get('/', status_code=status.HTTP_200_OK, response_model=UsersList)
-async def get_all_users(
+async def get_users(
     _: T_CurrentUser,
     session: T_Session,
     filter: Annotated[FilterPage, Query()],

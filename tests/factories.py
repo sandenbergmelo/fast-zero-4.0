@@ -1,6 +1,7 @@
 import factory
+import factory.fuzzy
 
-from fast_zero.db.models import User
+from fast_zero.db.models import Todo, TodoState, User
 
 
 class UserFactory(factory.Factory):
@@ -10,3 +11,13 @@ class UserFactory(factory.Factory):
     username = factory.Sequence(lambda n: f'test{n}')
     email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
     password = factory.LazyAttribute(lambda obj: f'{obj.username}-password')
+
+
+class TodoFactory(factory.Factory):
+    class Meta:
+        model = Todo
+
+    title = factory.Faker('text')
+    description = factory.Faker('text')
+    state = factory.fuzzy.FuzzyChoice(TodoState)
+    user_id = 1
