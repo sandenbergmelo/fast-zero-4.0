@@ -5,9 +5,13 @@ from typing import AsyncGenerator
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from fast_zero.app import app
 from fast_zero.db.connection import get_session
@@ -16,32 +20,34 @@ from fast_zero.helpers.security import get_password_hash
 from tests.factories import UserFactory
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def anyio_backend():
     return ('asyncio', {'use_uvloop': True})
 
 
-@pytest.fixture
-async def session(anyio_backend) -> AsyncGenerator[AsyncSession, None]:
-    async_engine = create_async_engine(
-        'sqlite+aiosqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:17', driver='psycopg') as postgres:
+        yield create_async_engine(postgres.get_connection_url())
 
+
+@pytest.fixture
+async def session(
+    anyio_backend, engine: AsyncEngine
+) -> AsyncGenerator[AsyncSession, None]:
     async_session = async_sessionmaker(
-        bind=async_engine,
+        bind=engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
 
-    async with async_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(table_registry.metadata.create_all)
 
     async with async_session() as session:
         yield session
 
-    async with async_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(table_registry.metadata.drop_all)
 
 

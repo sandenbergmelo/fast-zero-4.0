@@ -6,17 +6,28 @@
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "aiosqlite",
+        "codeclimate",
+        "fastzero",
         "freezegun",
+        "github",
         "johndoe",
+        "nosetests",
         "onupdate",
+        "pgdata",
         "poolclass",
         "psycopg",
         "pwdlib",
+        "pycache",
         "pydantic",
         "pyjwt",
+        "ropeproject",
+        "sdist",
         "selectin",
         "sessionmaker",
         "supersecretpassword",
+        "taskcluster",
+        "testcontainers",
+        "travis",
         "tzdata"
     ]
 }

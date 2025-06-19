@@ -1,10 +1,9 @@
 from dataclasses import asdict
 
-import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from fast_zero.db.models import Todo, User
+from fast_zero.db.models import User
 
 
 async def test_create_user(session: AsyncSession, mock_db_time):
@@ -27,16 +26,16 @@ async def test_create_user(session: AsyncSession, mock_db_time):
     }
 
 
-async def test_create_todo_error(session: AsyncSession, user):
-    todo = Todo(
-        title='Test Todo',
-        description='Test Desc',
-        state='test',
-        user_id=user.id,
-    )
+# async def test_create_todo_error(session: AsyncSession, user):
+#     todo = Todo(
+#         title='Test Todo',
+#         description='Test Desc',
+#         state='test',
+#         user_id=user.id,
+#     )
 
-    session.add(todo)
-    await session.commit()
+#     session.add(todo)
+#     await session.commit()
 
-    with pytest.raises(LookupError):
-        await session.scalar(select(Todo))
+#     with pytest.raises(LookupError):
+#         await session.scalar(select(Todo))

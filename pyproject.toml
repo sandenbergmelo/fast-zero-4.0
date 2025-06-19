@@ -10,10 +10,10 @@ authors = [
 requires-python = ">=3.12,<4.0"
 
 dependencies = [
-    "aiosqlite>=0.21.0",
     "alembic>=1.16.1",
     "fastapi[standard]>=0.115.12",
     "freezegun>=1.5.2",
+    "psycopg[binary]>=3.2.9",
     "pwdlib[argon2]>=0.2.1",
     "pydantic-settings>=2.9.1",
     "pyjwt>=2.10.1",
@@ -28,6 +28,7 @@ dev = [
     "pytest-cov>=6.1.1",
     "ruff>=0.11.10",
     "taskipy>=1.14.1",
+    "testcontainers>=4.10.0",
 ]
 
 [build-system]
@@ -57,7 +58,7 @@ concurrency = ["thread", "greenlet"]
 
 [tool.taskipy.tasks]
 dev = 'fastapi dev src/fast_zero/app.py'
-run = 'fastapi run src/fast_zero/app.py'
+run = 'fastapi run --host 0.0.0.0 src/fast_zero/app.py'
 
 lint = 'ruff check'
 pre_format = 'ruff check --fix'
